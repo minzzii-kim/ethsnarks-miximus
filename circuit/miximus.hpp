@@ -31,7 +31,7 @@ const extern size_t MIXIMUS_TREE_DEPTH;
 char *miximus_prove(
     const char *pk_file,
     const char *in_root,
-    const char *in_exthash,
+    //const char *in_exthash,
     const char *in_secret,
     const char *in_address,
     const char **in_path

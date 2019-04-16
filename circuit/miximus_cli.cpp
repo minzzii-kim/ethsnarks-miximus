@@ -55,23 +55,30 @@ static int main_prove( int argc, char **argv )
     auto pk_filename = argv[2];
     auto proof_filename = argv[3];
     auto arg_root = argv[4];
+    #if 0
     auto arg_exthash = argv[5];
     auto arg_secret = argv[6];
     auto arg_address = argv[7];
+    #else
+    auto arg_secret = argv[5];
+    auto arg_address = argv[6];
+    #endif
+    
     
     const char *arg_path[MIXIMUS_TREE_DEPTH];
     for( size_t i = 0; i < MIXIMUS_TREE_DEPTH; i++ ) {
         arg_path[i] = argv[9 + i];
     }
-
-    auto json = miximus_prove(pk_filename, arg_root, arg_exthash, arg_secret, arg_address, arg_path);
+#if 1
+    //auto json = miximus_prove(pk_filename, arg_root, arg_exthash, arg_secret, arg_address, arg_path);
+    auto json = miximus_prove(pk_filename, arg_root, arg_secret, arg_address, arg_path);
 
     ofstream fh;
     fh.open(proof_filename, std::ios::binary);
     fh << json;
     fh.flush();
     fh.close();
-
+#endif
     return 0;
 }
 

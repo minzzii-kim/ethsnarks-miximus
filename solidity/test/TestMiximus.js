@@ -78,13 +78,55 @@ let proof_to_flat = (proof) => {
 
 
 contract("TestableMiximus", () => {
+    describe("Transactions-proof test", ()=>{
+        it("tx proof verify test", async()=>{
+            const tx1 = {};
+            const tx2 = {};
+            const tx3 = {};
+            let TXs = [tx1, tx2, tx3];
+            let obj = await TestableMiximus.deployed();
+            //let leaf_hash = obj.MakeLeafHash.call(TXs);
+            let secret = new BN(crypto.randomBytes(30).toString("hex"), 16);
+            let leaf_hash = await obj.MakeLeafHash.call(secret);
+            let new_root_and_offset = await obj.Deposit.call(leaf_hash, {value: 1000000000000000000});
+            let tmp = await obj.GetPath.call(new_root_and_offset[1]); //[minzzii] proof_path, address_bits
+            let proof_address = tmp[1].map((_) => _ ? "1" : "0").join("");
+            let proof_path = [];
+            for( var i = 0; i < proof_address.length; i++ ) {
+                proof_path.push( tmp[0][i].toString(10) );
+            }
+            let proof_root = await obj.GetRoot.call();
+            proof_root = new_root_and_offset[0];
+            let leaf_index = new_root_and_offset[1];
+            //let proof_exthash = await obj.GetExtHash.call();
+
+            //let nullifier = libmiximus.miximus_nullifier(secret.toString(10), leaf_index.toString(10));
+            //console.log('Nullifier is', nullifier);
+            let proof_pub_hash = await obj.HashPublicInputs.call(proof_root); //leaf_index 넣어줘야할것같음
+
+            // Run prover to generate proof
+            let args = [
+                MiximusProvingKeyPath,
+                proof_root.toString(10),
+                //proof_exthash.toString(10),
+                secret.toString(10), //leaf_index로 ...바꿔야할듯
+                proof_address,
+                proof_path
+            ];
+            let proof_json = libmiximus.miximus_prove(...args);
+            assert.notStrictEqual(proof_json, null);
+            let proof = JSON.parse(proof_json);
+            console.log("[minzzii] proof: ", proof);
+        });
+    });
+/*
     describe("Deposit", () => {
         it("deposits then withdraws", async () => {
             let obj = await TestableMiximus.deployed();
 
             // Parameters for deposit
             let secret = new BN(crypto.randomBytes(30).toString("hex"), 16);
-            let leaf_hash = await obj.MakeLeafHash.call(secret);
+            let leaf_hash = await obj.MakeLeafHash.call(secret); //[minzzii] MiMC.hash(secret)
 
             // Perform deposit
             let new_root_and_offset = await obj.Deposit.call(leaf_hash, {value: 1000000000000000000});
@@ -95,7 +137,7 @@ contract("TestableMiximus", () => {
 
 
             // Build parameters for proving
-            let tmp = await obj.GetPath.call(new_root_and_offset[1]);
+            let tmp = await obj.GetPath.call(new_root_and_offset[1]); //[minzzii] proof_path, address_bits
             let proof_address = tmp[1].map((_) => _ ? "1" : "0").join("");
             let proof_path = [];
             for( var i = 0; i < proof_address.length; i++ ) {
@@ -179,4 +221,5 @@ contract("TestableMiximus", () => {
             // TODO: verify balance has been increased
         });
     });
+*/
 });

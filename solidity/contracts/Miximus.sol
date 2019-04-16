@@ -83,7 +83,8 @@ contract Miximus
     {
         uint256[] memory vals = new uint256[](1);
         vals[0] = secret;
-        return MiMC.Hash(vals);
+        //return MiMC.Hash(vals);
+        return uint256(sha256(abi.encodePacked(secret)))% Verifier.ScalarField();
     }
 
 
@@ -120,12 +121,13 @@ contract Miximus
     * Condense multiple public inputs down to a single one to be provided to the zkSNARK circuit
     */
     function HashPublicInputs(
-        uint256 in_root,
-        uint256 in_nullifier,
-        uint256 in_exthash
+        uint256 in_root
+        //uint256 in_nullifier,
+        //uint256 in_exthash
     )
         public pure returns (uint256)
     {
+        /*
         uint256[] memory inputs_to_hash = new uint256[](3);
 
         inputs_to_hash[0] = in_root;
@@ -133,6 +135,8 @@ contract Miximus
         inputs_to_hash[2] = in_exthash;
 
         return MiMC.Hash(inputs_to_hash);
+        */
+        return uint256(sha256(abi.encodePacked(in_root)))% Verifier.ScalarField();
     }
 
 
@@ -146,7 +150,8 @@ contract Miximus
     {
         // Public inputs for the zkSNARK circuit are hashed into a single input
         uint256[] memory snark_input = new uint256[](1);
-        snark_input[0] = HashPublicInputs(in_root, in_nullifier, in_exthash);
+        //[minzzii]
+        //snark_input[0] = HashPublicInputs(in_root, in_nullifier, in_exthash);
 
         // Retrieve verifying key
         uint256[14] memory vk;
